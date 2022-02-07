@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Club {
+  id           String    @id @default(uuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  name         String
+  abbreviation String    @unique
+  slug         String    @unique
+  regattas     Regatta[]
+}
+
+model Regatta {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  name      String
+  date      DateTime?
+  clubId    String
+  club      Club      @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  races     Race[]
+}
+
+model Race {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  name      String
+  date      DateTime?
+  regattaId String
+  regatta   Regatta   @relation(fields: [regattaId], references: [id], onDelete: Cascade)
+  starts    Start[]
+}
+
+model Start {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  number    Int
+  start     DateTime?
+  end       DateTime?
+  raceId    String
+  race      Race      @relation(fields: [raceId], references: [id], onDelete: Cascade)
+}
