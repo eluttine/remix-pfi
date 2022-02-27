@@ -1,5 +1,7 @@
 import { Race } from "@prisma/client";
 import { Link } from "remix";
+import { format } from "date-fns";
+import finnishLocale from "date-fns/locale/fi";
 
 type RacesProps = {
   races: Race[];
@@ -24,7 +26,11 @@ export default function Races(props: RacesProps) {
           <tbody>
             {races.map((race) => (
               <tr key={race.id}>
-                <td>{race.date}</td>
+                <td>
+                  {format(new Date(race.date), "dd MMMM, yyyy", {
+                    locale: finnishLocale,
+                  })}
+                </td>
                 <td>
                   <Link to={race.id}>{race.name}</Link>
                 </td>
