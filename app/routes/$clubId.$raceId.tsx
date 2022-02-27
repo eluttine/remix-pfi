@@ -4,10 +4,13 @@ import RaceComponent from "~/components/RaceComponent";
 import Breadcrumb from "~/components/Breadcrumb";
 import Navbar from "~/components/Navbar";
 
-import type { Club, Race } from "@prisma/client";
+import type { Club, Race, RaceLine, RaceStart } from "@prisma/client";
 import { db } from "~/utils/db.server";
 
-type LoaderData = { club: Club; race: Race };
+type LoaderData = {
+  club: Club;
+  race: Race & { starts: (RaceStart & { raceLines: RaceLine[] })[] };
+};
 
 export let loader: LoaderFunction = async ({ params }) => {
   const club = await db.club.findUnique({
@@ -17,6 +20,13 @@ export let loader: LoaderFunction = async ({ params }) => {
   const race = await db.race.findUnique({
     where: {
       id: params.raceId,
+    },
+    include: {
+      starts: {
+        include: {
+          raceLines: true,
+        },
+      },
     },
   });
 

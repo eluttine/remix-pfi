@@ -3,14 +3,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { Club, Race } from "@prisma/client";
 
-export type BreadcrumbProps = {
+type Props = {
   club: Club;
   race?: Race;
 };
 
-export default function Breadcrumb(props: BreadcrumbProps) {
+export default function Breadcrumb(props: Props) {
   const { club, race } = props;
-  // const clubPath = `/${club.abbreviation}`
 
   return (
     <section className="section pt-4 pb-0">

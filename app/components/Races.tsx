@@ -7,7 +7,6 @@ type RacesProps = {
 
 export default function Races(props: RacesProps) {
   const { races } = props;
-  console.log("races", races);
 
   return (
     <div className="container pt-5 pl-5">

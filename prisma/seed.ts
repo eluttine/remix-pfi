@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, RaceLine } from "@prisma/client";
 const db = new PrismaClient();
 
 async function seed() {
@@ -33,11 +33,21 @@ async function seed() {
   );
 
   await Promise.all(
-    getStarts().map((start) => {
-      return db.start.upsert({
-        where: { id: start.id },
+    getRaceStarts().map((raceStart) => {
+      return db.raceStart.upsert({
+        where: { id: raceStart.id },
         update: {},
-        create: start,
+        create: raceStart,
+      });
+    })
+  );
+
+  await Promise.all(
+    getRaceLines().map((raceLine) => {
+      return db.raceLine.upsert({
+        where: { id: raceLine.id },
+        update: {},
+        create: raceLine,
       });
     })
   );
@@ -65,9 +75,9 @@ function getClubs() {
 function getRegattas() {
   return [
     {
-      id: "regatta-1",
-      name: "Testi regatta 1",
-      date: new Date(),
+      id: "kokkokarnevaali",
+      name: "Kokkokarnevaali 2021",
+      date: new Date("2021-06-21"),
       clubId: "jvs",
     },
   ];
@@ -76,29 +86,49 @@ function getRegattas() {
 function getRaces() {
   return [
     {
-      id: "race-1",
-      name: "Test race 1",
-      date: new Date(),
-      regattaId: "regatta-1",
+      id: "kokkokarnevaali-race",
+      date: new Date("2021-06-21"),
+      name: "Kokkokarnevaali 2021",
+      regattaId: "kokkokarnevaali",
     },
   ];
 }
 
-function getStarts() {
+function getRaceStarts() {
   return [
     {
-      id: "start-1",
+      id: "kokkokarnevaali-start",
       number: 1,
-      start: new Date(),
-      end: new Date(),
-      raceId: "race-1",
+      start: new Date("2021-06-21T13:00"),
+      raceId: "kokkokarnevaali-race",
     },
-    // {
-    //   id: "start-2",
-    //   number: 2,
-    //   start: new Date(),
-    //   end: new Date(),
-    //   raceId: "race-1",
-    // },
+  ];
+}
+
+function getRaceLines() {
+  const startTime = new Date("2021-06-21T13:00:00+03:00");
+  const endTime = new Date("2021-06-21T14:57:15+03:00");
+  const handicap = 0.9227;
+
+  const sailingDuration = endTime.getTime() - startTime.getTime();
+  console.log("sailingDuration :", sailingDuration);
+  const handicapDuration = Math.round(sailingDuration * handicap);
+  console.log("handicapDuration :", handicapDuration);
+
+  return [
+    {
+      id: "raceline-1",
+      position: 1,
+      boatSailnumber: "FIN-5591",
+      boatName: "Accelerando",
+      boatHandicap: handicap,
+      boatModel: "Still 900",
+      boatSkipper: "Markku Pöyhönen",
+      startTime: startTime,
+      endTime: endTime,
+      sailingDuration: sailingDuration,
+      handicapDuration: handicapDuration,
+      raceStartId: "kokkokarnevaali-start",
+    },
   ];
 }

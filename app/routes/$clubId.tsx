@@ -1,7 +1,7 @@
 import { LoaderFunction, useLoaderData, useParams, useCatch } from "remix";
 
 import Races from "~/components/Races";
-import Breadcrumb, { BreadcrumbProps } from "~/components/Breadcrumb";
+import Breadcrumb from "~/components/Breadcrumb";
 import Navbar from "~/components/Navbar";
 
 import type { Club, Race } from "@prisma/client";

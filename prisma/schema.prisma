@@ -32,23 +32,42 @@ model Regatta {
 }
 
 model Race {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   name      String
-  date      DateTime?
+  date      DateTime
   regattaId String
-  regatta   Regatta   @relation(fields: [regattaId], references: [id], onDelete: Cascade)
-  starts    Start[]
+  regatta   Regatta     @relation(fields: [regattaId], references: [id], onDelete: Cascade)
+  starts    RaceStart[]
 }
 
-model Start {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+model RaceStart {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   number    Int
   start     DateTime?
   end       DateTime?
   raceId    String
-  race      Race      @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  race      Race       @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  raceLines RaceLine[]
+}
+
+model RaceLine {
+  id               String    @id @default(uuid())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  position         Int?
+  boatSailnumber   String
+  boatName         String?
+  boatHandicap     Float
+  boatModel        String?
+  boatSkipper      String?
+  startTime        DateTime
+  endTime          DateTime?
+  sailingDuration  Int?
+  handicapDuration Int?
+  raceStartId      String
+  raceStart        RaceStart @relation(fields: [raceStartId], references: [id], onDelete: Cascade)
 }
