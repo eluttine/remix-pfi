@@ -14,8 +14,9 @@ const formatHandicap = (value: number) => {
   return value.toString().replace(".", ",");
 };
 
-const formatTime = (value: string | null) => {
+const formatTime = (value: string | Date | null) => {
   if (!value) return "";
+  if (value instanceof Date) return format(value, "H:mm:ss");
   return format(new Date(value), "H:mm:ss");
 };
 
@@ -44,7 +45,6 @@ export default function RaceComponent(props: Props) {
       <h1 className="title">{race.name}</h1>
 
       <div className="p-3">
-        <h2 className="subtitle is-4">2021 kilpailut</h2>
         <table className="table">
           <thead>
             <tr>
