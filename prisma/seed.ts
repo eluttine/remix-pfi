@@ -106,29 +106,54 @@ function getRaceStarts() {
 }
 
 function getRaceLines() {
-  const startTime = new Date("2021-06-21T13:00:00+03:00");
-  const endTime = new Date("2021-06-21T14:57:15+03:00");
-  const handicap = 0.9227;
+  const racelines = [];
 
+  let start = new Date("2021-06-21T13:00:00+03:00");
+  let end = new Date("2021-06-21T14:57:15+03:00");
+  let handicap = 0.9227;
+  let durations = getDurations(start, end, handicap);
+  racelines.push({
+    id: "raceline-1",
+    position: 1,
+    boatSailnumber: "FIN-5591",
+    boatName: "Accelerando",
+    boatHandicap: handicap,
+    boatModel: "Still 900",
+    boatSkipper: "Markku Pöyhönen",
+    startTime: start,
+    endTime: end,
+    sailingDuration: durations.sailingDuration,
+    handicapDuration: durations.handicapDuration,
+    raceStartId: "kokkokarnevaali-start",
+  });
+
+  start = new Date("2021-06-21T13:00:00+03:00");
+  end = new Date("2021-06-21T15:00:30+03:00");
+  handicap = 0.9025;
+  durations = getDurations(start, end, handicap);
+  racelines.push({
+    id: "raceline-2",
+    position: 2,
+    boatSailnumber: "FIN-8845",
+    boatName: "Shango",
+    boatHandicap: handicap,
+    boatModel: "X-79",
+    boatSkipper: "Heikki Nurmi",
+    startTime: start,
+    endTime: end,
+    sailingDuration: durations.sailingDuration,
+    handicapDuration: durations.handicapDuration,
+    raceStartId: "kokkokarnevaali-start",
+  });
+
+  return racelines;
+}
+
+function getDurations(startTime: Date, endTime: Date, handicap: number) {
   const sailingDuration = endTime.getTime() - startTime.getTime();
-  console.log("sailingDuration :", sailingDuration);
   const handicapDuration = Math.round(sailingDuration * handicap);
-  console.log("handicapDuration :", handicapDuration);
-
-  return [
-    {
-      id: "raceline-1",
-      position: 1,
-      boatSailnumber: "FIN-5591",
-      boatName: "Accelerando",
-      boatHandicap: handicap,
-      boatModel: "Still 900",
-      boatSkipper: "Markku Pöyhönen",
-      startTime: startTime,
-      endTime: endTime,
-      sailingDuration: sailingDuration,
-      handicapDuration: handicapDuration,
-      raceStartId: "kokkokarnevaali-start",
-    },
-  ];
+  return {
+    sailingDuration,
+    handicapDuration,
+  };
 }
