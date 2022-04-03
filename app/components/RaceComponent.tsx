@@ -1,6 +1,5 @@
 import { Race, RaceLine, RaceStart } from "@prisma/client";
 import { format } from "date-fns";
-import { Link } from "remix";
 
 type Props = {
   race: Race & {
@@ -41,7 +40,7 @@ export default function RaceComponent(props: Props) {
   const racelines = race.starts[0].raceLines;
 
   return (
-    <div className="container pt-5 pl-5">
+    <div>
       <h1 className="title">{race.name}</h1>
 
       <div className="p-3">
