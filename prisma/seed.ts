@@ -99,7 +99,7 @@ function getRaceStarts() {
     {
       id: "kokkokarnevaali-start",
       number: 1,
-      start: new Date("2021-06-21T13:00"),
+      startTime: new Date("2021-06-21T13:00"),
       raceId: "kokkokarnevaali-race",
     },
   ];
@@ -108,7 +108,7 @@ function getRaceStarts() {
 function getRaceLines() {
   const racelines = [];
 
-  let start = new Date("2021-06-21T13:00:00+03:00");
+  const start = new Date("2021-06-21T13:00:00+03:00");
   let end = new Date("2021-06-21T14:57:15+03:00");
   let handicap = 0.9227;
   let durations = getDurations(start, end, handicap);
@@ -120,14 +120,14 @@ function getRaceLines() {
     boatHandicap: handicap,
     boatModel: "Still 900",
     boatSkipper: "Markku Pöyhönen",
-    startTime: start,
+    // startTime: start,
     endTime: end,
     sailingDuration: durations.sailingDuration,
     handicapDuration: durations.handicapDuration,
     raceStartId: "kokkokarnevaali-start",
   });
 
-  start = new Date("2021-06-21T13:00:00+03:00");
+  // start = new Date("2021-06-21T13:00:00+03:00");
   end = new Date("2021-06-21T15:00:30+03:00");
   handicap = 0.9025;
   durations = getDurations(start, end, handicap);
@@ -139,7 +139,7 @@ function getRaceLines() {
     boatHandicap: handicap,
     boatModel: "X-79",
     boatSkipper: "Heikki Nurmi",
-    startTime: start,
+    // startTime: start,
     endTime: end,
     sailingDuration: durations.sailingDuration,
     handicapDuration: durations.handicapDuration,

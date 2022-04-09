@@ -47,8 +47,8 @@ model RaceStart {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   number    Int
-  start     DateTime?
-  end       DateTime?
+  startTime DateTime?
+  endTime   DateTime?
   raceId    String
   race      Race       @relation(fields: [raceId], references: [id], onDelete: Cascade)
   raceLines RaceLine[]
@@ -64,7 +64,7 @@ model RaceLine {
   boatHandicap     Float
   boatModel        String?
   boatSkipper      String?
-  startTime        DateTime
+  // startTime        DateTime
   endTime          DateTime?
   sailingDuration  Int?
   handicapDuration Int?

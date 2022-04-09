@@ -18,7 +18,8 @@ import { db } from "~/utils/db.server";
 
 type LoaderData = {
   club: Club;
-  race: Race & { starts: (RaceStart & { raceLines: RaceLine[] })[] };
+  race: Race; //& { starts: (RaceStart & { raceLines: RaceLine[] })[] };
+  start: RaceStart & { raceLines: RaceLine[] };
 };
 
 export let loader: LoaderFunction = async ({ params }) => {
@@ -32,20 +33,29 @@ export let loader: LoaderFunction = async ({ params }) => {
     },
     include: {
       starts: {
+        where: {
+          id: params.raceStartId,
+        },
         include: {
-          raceLines: true,
+          raceLines: {
+            orderBy: {
+              position: "asc",
+            },
+          },
         },
       },
     },
   });
 
-  if (!club || !race) {
+  const start = race?.starts[0];
+
+  if (!club || !race || !start) {
     throw new Response("Sivua ei löytynyt.", {
       status: 404,
     });
   }
 
-  return { club, race };
+  return { club, race, start };
 };
 
 type ActionData = {
@@ -89,7 +99,8 @@ const validateBoatName = (boatName: string) => {
   return undefined;
 };
 const validateBoatHandicap = (boatHandicap: string) => {
-  return undefined;
+  const float = parseFloat(boatHandicap.replace(",", "."));
+  if (typeof float !== "number" && !isNaN(float)) return "Handicap not valid";
 };
 const validateBoatModel = (boatModel: string) => {
   return undefined;
@@ -101,11 +112,7 @@ const validateEndTime = (endTime: string) => {
   return undefined;
 };
 
-export const action: ActionFunction = async ({ request }) => {
-  console.log("request", request);
-
-  console.log();
-
+export const action: ActionFunction = async ({ request, params }) => {
   const form = await request.formData();
 
   const position = form.get("position");
@@ -119,7 +126,7 @@ export const action: ActionFunction = async ({ request }) => {
   // const sailingDuration = form.get("sailingDuration"); //  number | null
   // const handicapDuration = form.get("handicapDuration"); //  number | null
   // const raceStartId = form.get("raceStartId"); //  string
-  const raceStartId = form.get("raceStartId");
+  //const raceStartId = form.get("raceStartId");
 
   if (
     typeof position !== "string" ||
@@ -128,11 +135,10 @@ export const action: ActionFunction = async ({ request }) => {
     typeof boatHandicap !== "string" ||
     typeof boatModel !== "string" ||
     typeof boatSkipper !== "string" ||
-    typeof endTime !== "string" ||
-    typeof raceStartId !== "string"
+    typeof endTime !== "string"
   ) {
     return badRequest({
-      formError: `Form not submitted correctly.`,
+      formError: `Form not submitted correctly 1`,
     });
   }
 
@@ -160,18 +166,28 @@ export const action: ActionFunction = async ({ request }) => {
     return badRequest({ fieldErrors, fields });
   }
 
+  const raceStart = await db.raceStart.findUnique({
+    where: { id: params.raceStartId },
+  });
+
+  if (!raceStart) {
+    throw new Response("Race start not found", { status: 404 });
+  }
+
+  const endtimeDt = getEndTime(raceStart.startTime, endTime);
+
   try {
     return db.raceLine.create({
       data: {
         position: parseInt(position),
         boatSailnumber,
         boatName,
-        boatHandicap: parseFloat(boatHandicap),
+        boatHandicap: parseFloat(boatHandicap.replace(",", ".")),
         boatModel,
         boatSkipper,
-        startTime: new Date(),
-        endTime,
-        raceStartId,
+        // startTime: raceStart.startTime,
+        endTime: endtimeDt,
+        raceStartId: raceStart.id,
       },
     });
   } catch (e) {
@@ -237,3 +253,13 @@ export function ErrorBoundary({ error }: { error: Error }) {
     <div>{`There was an error loading club by the id ${clubId}. Sorry.`}</div>
   );
 }
+
+const getEndTime = (startTime: Date | null, endTime: string | undefined) => {
+  if (!startTime || !endTime) return null;
+
+  const [hours, minutes, seconds] = endTime.split(":");
+  startTime.setHours(parseInt(hours));
+  startTime.setMinutes(parseInt(minutes));
+  startTime.setSeconds(parseInt(seconds));
+  return startTime;
+};
