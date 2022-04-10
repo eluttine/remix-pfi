@@ -6,26 +6,26 @@ import {
   Form,
   ActionFunction,
   json,
-} from "remix";
+} from 'remix'
 
-import RaceComponent from "~/components/RaceComponent";
-import Breadcrumb from "~/components/Breadcrumb";
-import Navbar from "~/components/Navbar";
-import { TextFieldInput } from "~/components/TextFieldInput";
+import RaceComponent from '~/components/RaceComponent'
+import Breadcrumb from '~/components/Breadcrumb'
+import Navbar from '~/components/Navbar'
+import { TextFieldInput } from '~/components/TextFieldInput'
 
-import type { Club, Race, RaceLine, RaceStart } from "@prisma/client";
-import { db } from "~/utils/db.server";
+import type { Club, Race, RaceLine, RaceStart } from '@prisma/client'
+import { db } from '~/utils/db.server'
 
 type LoaderData = {
-  club: Club;
-  race: Race; //& { starts: (RaceStart & { raceLines: RaceLine[] })[] };
-  start: RaceStart & { raceLines: RaceLine[] };
-};
+  club: Club
+  race: Race //& { starts: (RaceStart & { raceLines: RaceLine[] })[] };
+  start: RaceStart & { raceLines: RaceLine[] }
+}
 
 export let loader: LoaderFunction = async ({ params }) => {
   const club = await db.club.findUnique({
     where: { slug: params.clubId },
-  });
+  })
 
   const race = await db.race.findUnique({
     where: {
@@ -39,107 +39,107 @@ export let loader: LoaderFunction = async ({ params }) => {
         include: {
           raceLines: {
             orderBy: {
-              position: "asc",
+              position: 'asc',
             },
           },
         },
       },
     },
-  });
+  })
 
-  const start = race?.starts[0];
+  const start = race?.starts[0]
 
   if (!club || !race || !start) {
-    throw new Response("Sivua ei löytynyt.", {
+    throw new Response('Sivua ei löytynyt.', {
       status: 404,
-    });
+    })
   }
 
-  return { club, race, start };
-};
+  return { club, race, start }
+}
 
 type ActionData = {
-  formError?: string;
+  formError?: string
   fieldErrors?: {
-    position: string | undefined;
-    boatSailnumber: string | undefined;
-    boatName: string | undefined;
-    boatHandicap: string | undefined;
-    boatModel: string | undefined;
-    endTime: string | undefined;
-  };
+    position: string | undefined
+    boatSailnumber: string | undefined
+    boatName: string | undefined
+    boatHandicap: string | undefined
+    boatModel: string | undefined
+    endTime: string | undefined
+  }
   fields?: {
-    position: string;
-    boatSailnumber: string;
-    boatName: string;
-    boatHandicap: string;
-    boatModel: string;
-    endTime: string;
-  };
-};
+    position: string
+    boatSailnumber: string
+    boatName: string
+    boatHandicap: string
+    boatModel: string
+    endTime: string
+  }
+}
 
-const badRequest = (data: ActionData) => json(data, { status: 400 });
+const badRequest = (data: ActionData) => json(data, { status: 400 })
 
 // Validators
 const validatePosition = (position: string) => {
   if (!position) {
-    return "Position is required";
+    return 'Position is required'
   } else if (
-    typeof position !== "string" ||
+    typeof position !== 'string' ||
     !Number.isInteger(Number(position)) ||
     Number(position) < 1
   ) {
-    return "Position not valid";
+    return 'Position not valid'
   }
-};
+}
 const validateBoatSailnumber = (boatSailnumber: string) => {
-  return undefined;
-};
+  return undefined
+}
 const validateBoatName = (boatName: string) => {
-  return undefined;
-};
+  return undefined
+}
 const validateBoatHandicap = (boatHandicap: string) => {
-  const float = parseFloat(boatHandicap.replace(",", "."));
-  if (typeof float !== "number" && !isNaN(float)) return "Handicap not valid";
-};
+  const float = parseFloat(boatHandicap.replace(',', '.'))
+  if (typeof float !== 'number' && !isNaN(float)) return 'Handicap not valid'
+}
 const validateBoatModel = (boatModel: string) => {
-  return undefined;
-};
+  return undefined
+}
 const validateBoatSkipper = (boatSkipper: string) => {
-  return undefined;
-};
+  return undefined
+}
 const validateEndTime = (endTime: string) => {
-  return undefined;
-};
+  return undefined
+}
 
 export const action: ActionFunction = async ({ request, params }) => {
-  const form = await request.formData();
+  const form = await request.formData()
 
-  const position = form.get("position");
-  const boatSailnumber = form.get("boatSailnumber");
-  const boatName = form.get("boatName");
-  const boatHandicap = form.get("boatHandicap");
-  const boatModel = form.get("boatModel");
-  const boatSkipper = form.get("boatSkipper");
+  const position = form.get('position')
+  const boatSailnumber = form.get('boatSailnumber')
+  const boatName = form.get('boatName')
+  const boatHandicap = form.get('boatHandicap')
+  const boatModel = form.get('boatModel')
+  const boatSkipper = form.get('boatSkipper')
   // const startTime = form.get("startTime");
-  const endTime = form.get("endTime");
+  const endTime = form.get('endTime')
   // const sailingDuration = form.get("sailingDuration"); //  number | null
   // const handicapDuration = form.get("handicapDuration"); //  number | null
   // const raceStartId = form.get("raceStartId"); //  string
   //const raceStartId = form.get("raceStartId");
 
   if (
-    typeof position !== "string" ||
-    typeof boatSailnumber !== "string" ||
-    typeof boatName !== "string" ||
-    typeof boatHandicap !== "string" ||
-    typeof boatModel !== "string" ||
-    typeof boatSkipper !== "string" ||
-    typeof endTime !== "string"
+    typeof position !== 'string' ||
+    typeof boatSailnumber !== 'string' ||
+    typeof boatName !== 'string' ||
+    typeof boatHandicap !== 'string' ||
+    typeof boatModel !== 'string' ||
+    typeof boatSkipper !== 'string' ||
+    typeof endTime !== 'string'
   ) {
     return badRequest({
       formError: `Form not submitted correctly 1`,
-    });
+    })
   }
 
   const fieldErrors = {
@@ -150,7 +150,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     boatModel: validateBoatModel(boatModel),
     boatSkipper: validateBoatSkipper(boatSkipper),
     endTime: validateEndTime(endTime),
-  };
+  }
 
   const fields = {
     position,
@@ -160,21 +160,21 @@ export const action: ActionFunction = async ({ request, params }) => {
     boatModel,
     boatSkipper,
     endTime,
-  };
+  }
 
   if (Object.values(fieldErrors).some(Boolean)) {
-    return badRequest({ fieldErrors, fields });
+    return badRequest({ fieldErrors, fields })
   }
 
   const raceStart = await db.raceStart.findUnique({
     where: { id: params.raceStartId },
-  });
+  })
 
   if (!raceStart) {
-    throw new Response("Race start not found", { status: 404 });
+    throw new Response('Race start not found', { status: 404 })
   }
 
-  const endtimeDt = getEndTime(raceStart.startTime, endTime);
+  const endtimeDt = getEndTime(raceStart.startTime, endTime)
 
   try {
     return db.raceLine.create({
@@ -182,31 +182,31 @@ export const action: ActionFunction = async ({ request, params }) => {
         position: parseInt(position),
         boatSailnumber,
         boatName,
-        boatHandicap: parseFloat(boatHandicap.replace(",", ".")),
+        boatHandicap: parseFloat(boatHandicap.replace(',', '.')),
         boatModel,
         boatSkipper,
         // startTime: raceStart.startTime,
         endTime: endtimeDt,
         raceStartId: raceStart.id,
       },
-    });
+    })
   } catch (e) {
-    console.log("Form parameter error:", e);
+    console.log('Form parameter error:', e)
     return badRequest({
       formError: `Form not submitted correctly.`,
-    });
+    })
   }
-};
+}
 
 export default function ClubIdRoute() {
-  const data = useLoaderData<LoaderData>();
+  const data = useLoaderData<LoaderData>()
 
   return (
     <div>
       <Navbar />
       <Breadcrumb club={data.club} race={data.race} />
       <div className="container pt-5 pl-5">
-        <RaceComponent race={data.race} />
+        <RaceComponent race={data.race} start={data.start} />
 
         <Form method="post">
           <div className="field is-horizontal">
@@ -224,42 +224,42 @@ export default function ClubIdRoute() {
         </Form>
       </div>
     </div>
-  );
+  )
 }
 
 export function CatchBoundary() {
-  const caught = useCatch();
-  const params = useParams();
+  const caught = useCatch()
+  const params = useParams()
 
   switch (caught.status) {
     case 404: {
-      return <div>Huh? What the heck is {params.clubId}?</div>;
+      return <div>Huh? What the heck is {params.clubId}?</div>
     }
     case 401: {
-      return <div>Sorry, but {params.clubId} is not your joke.</div>;
+      return <div>Sorry, but {params.clubId} is not your joke.</div>
     }
     default: {
-      throw new Error(`Unhandled error: ${caught.status}`);
+      throw new Error(`Unhandled error: ${caught.status}`)
     }
   }
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {
-  const { clubId } = useParams();
+  const { clubId } = useParams()
 
-  console.log("Error", error);
+  console.log('Error', error)
 
   return (
     <div>{`There was an error loading club by the id ${clubId}. Sorry.`}</div>
-  );
+  )
 }
 
 const getEndTime = (startTime: Date | null, endTime: string | undefined) => {
-  if (!startTime || !endTime) return null;
+  if (!startTime || !endTime) return null
 
-  const [hours, minutes, seconds] = endTime.split(":");
-  startTime.setHours(parseInt(hours));
-  startTime.setMinutes(parseInt(minutes));
-  startTime.setSeconds(parseInt(seconds));
-  return startTime;
-};
+  const [hours, minutes, seconds] = endTime.split(':')
+  startTime.setHours(parseInt(hours))
+  startTime.setMinutes(parseInt(minutes))
+  startTime.setSeconds(parseInt(seconds))
+  return startTime
+}

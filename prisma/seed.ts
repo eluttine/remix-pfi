@@ -1,49 +1,62 @@
 import { PrismaClient } from '@prisma/client'
+
 const db = new PrismaClient()
 
 async function seed() {
-  getClubs().map((club) => {
-    db.club.upsert({
-      where: { id: club.id },
-      update: {},
-      create: club,
-    })
-  })
+  console.log('Start seeding ...')
 
-  getRegattas().map((regatta) => {
-    return db.regatta.upsert({
-      where: { id: regatta.id },
+  for (const c of getClubs()) {
+    const club = await db.club.upsert({
+      where: { id: c.id },
       update: {},
-      create: regatta,
+      create: c,
     })
-  })
+    console.log(`Club '${club.name}' OK.`)
+  }
 
-  getRaces().map((race) => {
-    return db.race.upsert({
-      where: { id: race.id },
+  for (const r of getRegattas()) {
+    const regatta = await db.regatta.upsert({
+      where: { id: r.id },
       update: {},
-      create: race,
+      create: r,
     })
-  })
+    console.log(`Regatta '${regatta.name}' OK.`)
+  }
 
-  getRaceStarts().map((raceStart) => {
-    return db.raceStart.upsert({
-      where: { id: raceStart.id },
+  for (const r of getRaces()) {
+    const race = await db.race.upsert({
+      where: { id: r.id },
       update: {},
-      create: raceStart,
+      create: r,
     })
-  })
+    console.log(`Race '${race.name}' OK.`)
+  }
 
-  getRaceLines().map((raceLine) => {
-    return db.raceLine.upsert({
-      where: { id: raceLine.id },
+  for (const rs of getRaceStarts()) {
+    const raceStart = await db.raceStart.upsert({
+      where: { id: rs.id },
       update: {},
-      create: raceLine,
+      create: rs,
     })
-  })
+    console.log(`RaceStart '${raceStart.id}' OK.`)
+  }
+
+  for (const rl of getRaceLines()) {
+    const raceStart = await db.raceLine.upsert({
+      where: { id: rl.id },
+      update: {},
+      create: rl,
+    })
+    console.log(`RaceLine '${raceStart.position} - ${raceStart.boatName}' OK.`)
+  }
+
+  console.log('Seeding finished.')
 }
 
-seed()
+seed().catch((e) => {
+  console.error('Seed error:', e)
+  process.exit(1)
+})
 
 function getClubs() {
   return [

@@ -1,43 +1,42 @@
-import { Race, RaceLine, RaceStart } from "@prisma/client";
-import { format } from "date-fns";
+import { Race, RaceLine, RaceStart } from '@prisma/client'
+import { format } from 'date-fns'
 
 type Props = {
-  race: Race & {
-    starts: (RaceStart & {
-      raceLines: RaceLine[];
-    })[];
-  };
-};
+  race: Race
+  start: RaceStart & {
+    raceLines: RaceLine[]
+  }
+}
 
 const formatHandicap = (value: number) => {
-  return value.toString().replace(".", ",");
-};
+  return value.toString().replace('.', ',')
+}
 
 const formatTime = (value: string | Date | null) => {
-  if (!value) return "";
-  if (value instanceof Date) return format(value, "H:mm:ss");
-  return format(new Date(value), "H:mm:ss");
-};
+  if (!value) return ''
+  if (value instanceof Date) return format(value, 'H:mm:ss')
+  return format(new Date(value), 'H:mm:ss')
+}
 
 const formatDuration = (ms: number | null) => {
-  if (!ms) return "";
+  if (!ms) return ''
 
-  const seconds = Math.floor((ms / 1000) % 60);
-  const minutes = Math.floor((ms / 1000 / 60) % 60);
-  const hours = Math.floor((ms / 1000 / 3600) % 24);
+  const seconds = Math.floor((ms / 1000) % 60)
+  const minutes = Math.floor((ms / 1000 / 60) % 60)
+  const hours = Math.floor((ms / 1000 / 3600) % 24)
 
   const humanized = [
-    hours.toString().padStart(2, "0"),
-    minutes.toString().padStart(2, "0"),
-    seconds.toString().padStart(2, "0"),
-  ].join(":");
+    hours.toString().padStart(2, '0'),
+    minutes.toString().padStart(2, '0'),
+    seconds.toString().padStart(2, '0'),
+  ].join(':')
 
-  return humanized;
-};
+  return humanized
+}
 
 export default function RaceComponent(props: Props) {
-  const { race } = props;
-  const racelines = race.starts[0].raceLines;
+  const { race, start } = props
+  const racelines = start.raceLines
 
   return (
     <div>
@@ -74,5 +73,5 @@ export default function RaceComponent(props: Props) {
         </table>
       </div>
     </div>
-  );
+  )
 }
