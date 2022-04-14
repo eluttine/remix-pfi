@@ -15,6 +15,7 @@ import { TextFieldInput } from '~/components/TextFieldInput'
 
 import type { Club, Race, RaceLine, RaceStart } from '@prisma/client'
 import { db } from '~/utils/db.server'
+import { createRaceLineAndReorder } from '~/lib/raceLine'
 
 type LoaderData = {
   club: Club
@@ -61,7 +62,6 @@ export let loader: LoaderFunction = async ({ params }) => {
 type ActionData = {
   formError?: string
   fieldErrors?: {
-    position: string | undefined
     boatSailnumber: string | undefined
     boatName: string | undefined
     boatHandicap: string | undefined
@@ -69,7 +69,6 @@ type ActionData = {
     endTime: string | undefined
   }
   fields?: {
-    position: string
     boatSailnumber: string
     boatName: string
     boatHandicap: string
@@ -81,17 +80,6 @@ type ActionData = {
 const badRequest = (data: ActionData) => json(data, { status: 400 })
 
 // Validators
-const validatePosition = (position: string) => {
-  if (!position) {
-    return 'Position is required'
-  } else if (
-    typeof position !== 'string' ||
-    !Number.isInteger(Number(position)) ||
-    Number(position) < 1
-  ) {
-    return 'Position not valid'
-  }
-}
 const validateBoatSailnumber = (boatSailnumber: string) => {
   return undefined
 }
@@ -115,7 +103,6 @@ const validateEndTime = (endTime: string) => {
 export const action: ActionFunction = async ({ request, params }) => {
   const form = await request.formData()
 
-  const position = form.get('position')
   const boatSailnumber = form.get('boatSailnumber')
   const boatName = form.get('boatName')
   const boatHandicap = form.get('boatHandicap')
@@ -129,7 +116,6 @@ export const action: ActionFunction = async ({ request, params }) => {
   //const raceStartId = form.get("raceStartId");
 
   if (
-    typeof position !== 'string' ||
     typeof boatSailnumber !== 'string' ||
     typeof boatName !== 'string' ||
     typeof boatHandicap !== 'string' ||
@@ -143,7 +129,6 @@ export const action: ActionFunction = async ({ request, params }) => {
   }
 
   const fieldErrors = {
-    position: validatePosition(position),
     boatSailnumber: validateBoatSailnumber(boatSailnumber),
     boatName: validateBoatName(boatName),
     boatHandicap: validateBoatHandicap(boatHandicap),
@@ -153,7 +138,6 @@ export const action: ActionFunction = async ({ request, params }) => {
   }
 
   const fields = {
-    position,
     boatSailnumber,
     boatName,
     boatHandicap,
@@ -177,18 +161,15 @@ export const action: ActionFunction = async ({ request, params }) => {
   const endtimeDt = getEndTime(raceStart.startTime, endTime)
 
   try {
-    return db.raceLine.create({
-      data: {
-        position: parseInt(position),
-        boatSailnumber,
-        boatName,
-        boatHandicap: parseFloat(boatHandicap.replace(',', '.')),
-        boatModel,
-        boatSkipper,
-        // startTime: raceStart.startTime,
-        endTime: endtimeDt,
-        raceStartId: raceStart.id,
-      },
+    return createRaceLineAndReorder({
+      boatSailnumber,
+      boatName,
+      boatHandicap: parseFloat(boatHandicap.replace(',', '.')),
+      boatModel,
+      boatSkipper,
+      endTime: endtimeDt,
+      raceStartId: raceStart.id,
+      startTime: raceStart.startTime,
     })
   } catch (e) {
     console.log('Form parameter error:', e)
@@ -211,7 +192,6 @@ export default function ClubIdRoute() {
         <Form method="post">
           <div className="field is-horizontal">
             <div className="field-body">
-              <TextFieldInput label="Sijoitus" name="position" />
               <TextFieldInput label="Purjenumero" name="boatSailnumber" />
               <TextFieldInput label="Nimi" name="boatName" />
               <TextFieldInput label="Tasoitus" name="boatHandicap" />
@@ -257,9 +237,12 @@ export function ErrorBoundary({ error }: { error: Error }) {
 const getEndTime = (startTime: Date | null, endTime: string | undefined) => {
   if (!startTime || !endTime) return null
 
+  const start = new Date(startTime)
+
   const [hours, minutes, seconds] = endTime.split(':')
-  startTime.setHours(parseInt(hours))
-  startTime.setMinutes(parseInt(minutes))
-  startTime.setSeconds(parseInt(seconds))
-  return startTime
+  start.setHours(parseInt(hours))
+  start.setMinutes(parseInt(minutes))
+  start.setSeconds(parseInt(seconds))
+
+  return start
 }
